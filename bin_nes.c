@@ -5,6 +5,13 @@
 static int check(RBinFile *arch);
 static int check_bytes(const ut8 *buf, ut64 length);
 
+static void * load_bytes(RBinFile *arch, const ut8 *buf, ut64 sz, ut64 loadaddr, Sdb *sdb){
+	check_bytes (buf, sz);
+	// XXX: this may be wrong if check_bytes is true
+	return R_NOTNULL;
+}
+
+
 static int check(RBinFile *arch) {
 	const ut8 *bytes = arch ? r_buf_buffer (arch->buf) : NULL;
 	ut64 sz = arch ? r_buf_size (arch->buf): 0;
@@ -42,6 +49,7 @@ struct r_bin_plugin_t r_bin_plugin_nes = {
 	.fini = NULL,
 	.get_sdb = NULL,
 	.load = NULL,
+	.load_bytes = &load_bytes,
 	.check = &check,
 	.baddr = NULL,
 	.check_bytes = &check_bytes,
