@@ -19,3 +19,4 @@ install:
 
 uninstall:
 	rm -f $(R2_PLUGIN_PATH)/bin_nes.$(SO_EXT)
+ 
