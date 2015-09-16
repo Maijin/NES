@@ -1,4 +1,4 @@
-/* radare - LGPL - 2015 - pancake */
+/* radare - LGPL - 2015 - maijin */
 
 #include <r_bin.h>
 
