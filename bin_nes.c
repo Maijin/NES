@@ -12,9 +12,7 @@ static int check(RBinFile *arch) {
 }
 
 static int check_bytes(const ut8 *buf, ut64 length) {
-	if (!strncmp (buf, "NES", 3))
-                return true;
-	return false;
+	return strncmp(buf, "NES", 3) == 0;
 }
 
 static RBinInfo* info(RBinFile *arch) {
