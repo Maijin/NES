@@ -19,8 +19,10 @@ static int check(RBinFile *arch) {
 }
 
 static int check_bytes(const ut8 *buf, ut64 length) {
-	return strncmp(buf, "NES", 3) == 0;
+	if (!buf || length < 4) return false;
+	return (!memcmp (buf, "\x4E\x45\x53\x1A", 4));
 }
+
 
 static RBinInfo* info(RBinFile *arch) {
 	RBinInfo *ret = R_NEW0 (RBinInfo);
