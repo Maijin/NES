@@ -2,15 +2,24 @@
 
 #include <r_bin.h>
 
+typedef struct __attribute__((__packed__)) {
+	char id[0x4];						  // NES\x1A
+	ut8 prg_page_count_16k;			   // number of PRG-ROM pages
+	ut8 chr_page_count_8k;				// number of CHR-ROM pages
+	ut8 rom_control_byte_0;			   // flags describing ROM image
+	ut8 rom_control_byte_1;			   // flags describing ROM image
+	ut8 ram_bank_count_8k;				// size of PRG RAM
+	ut8 reserved[7];					  // zero filled
+} ines_hdr;
+
+
 static int check(RBinFile *arch);
 static int check_bytes(const ut8 *buf, ut64 length);
 
 static void * load_bytes(RBinFile *arch, const ut8 *buf, ut64 sz, ut64 loadaddr, Sdb *sdb){
 	check_bytes (buf, sz);
-	// XXX: this may be wrong if check_bytes is true
 	return R_NOTNULL;
 }
-
 
 static int check(RBinFile *arch) {
 	const ut8 *bytes = arch ? r_buf_buffer (arch->buf) : NULL;
@@ -23,15 +32,19 @@ static int check_bytes(const ut8 *buf, ut64 length) {
 	return (!memcmp (buf, "\x4E\x45\x53\x1A", 4));
 }
 
-
 static RBinInfo* info(RBinFile *arch) {
-	RBinInfo *ret = R_NEW0 (RBinInfo);
-	if (!ret) return NULL;
+	RBinInfo *ret = NULL;
+  ines_hdr ihdr;
+  memset (&ihdr, 0, sizeof (ihdr));
+  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
+  if (reat != sizeof (ihdr)) {
+    eprintf ("Truncated Header\n");
+    return NULL;
+  }
 
-	if (!arch || !arch->buf) {
-		free (ret);
-		return NULL;
-	}
+  if (!(ret = R_NEW0 (RBinInfo)))
+    return NULL;
+
 	ret->file = strdup (arch->file);
 	ret->type = strdup ("ROM");
 	ret->machine = strdup ("Nintendo NES");
@@ -40,6 +53,37 @@ static RBinInfo* info(RBinFile *arch) {
 	ret->bits = 8;
 
 	return ret;
+}
+
+static RList* sections(RBinFile *arch) {
+  ut64 textsize = UT64_MAX;
+  RList *ret = NULL;
+  RBinSection *ptr = NULL;
+  ines_hdr ihdr;
+  memset (&ihdr, 0, sizeof (ihdr));
+  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
+  if (reat != sizeof (ihdr)) {
+    eprintf ("Truncated Header\n");
+    return NULL;
+  }
+
+  if (!(ret = r_list_new ()))
+		return NULL;
+	ret->free = free;
+  int i;
+  for(i=0; i<ihdr.prg_page_count_16k; i++) {
+    if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+    char* section_name;
+    asprintf(&section_name, "PRG %i",i);
+    strcpy (ptr->name, section_name);
+    ptr->vsize = ptr->size = 0x4000;
+    ptr->vaddr = ptr->paddr = 0x10+i*ptr->size;
+    r_list_append (ret, ptr);
+    free(section_name);
+  }
+
+  return ret;
 }
 
 
@@ -56,7 +100,7 @@ struct r_bin_plugin_t r_bin_plugin_nes = {
 	.baddr = NULL,
 	.check_bytes = &check_bytes,
 	.entries = NULL,
-	.sections = NULL,
+	.sections = sections,
 	.info = &info,
 };
 
@@ -67,4 +111,3 @@ struct r_lib_struct_t radare_plugin = {
 	.version = R2_VERSION
 };
 #endif
-
