@@ -2,6 +2,11 @@
 
 #include <r_bin.h>
 
+#define PRG_PAGE_SIZE                       0x4000
+#define CHR_PAGE_SIZE                       0x2000
+#define INES_HDR_SIZE                       sizeof (ines_hdr)
+
+
 typedef struct __attribute__((__packed__)) {
 	char id[0x4];						  // NES\x1A
 	ut8 prg_page_count_16k;			   // number of PRG-ROM pages
@@ -38,12 +43,12 @@ static RBinInfo* info(RBinFile *arch) {
   memset (&ihdr, 0, sizeof (ihdr));
   int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
   if (reat != sizeof (ihdr)) {
-    eprintf ("Truncated Header\n");
-    return NULL;
+		eprintf ("Truncated Header\n");
+		return NULL;
   }
 
   if (!(ret = R_NEW0 (RBinInfo)))
-    return NULL;
+		return NULL;
 
 	ret->file = strdup (arch->file);
 	ret->type = strdup ("ROM");
@@ -63,24 +68,37 @@ static RList* sections(RBinFile *arch) {
   memset (&ihdr, 0, sizeof (ihdr));
   int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
   if (reat != sizeof (ihdr)) {
-    eprintf ("Truncated Header\n");
-    return NULL;
+		eprintf ("Truncated Header\n");
+		return NULL;
   }
 
   if (!(ret = r_list_new ()))
 		return NULL;
 	ret->free = free;
   int i;
+  ut64 first_chr_chunk;
   for(i=0; i<ihdr.prg_page_count_16k; i++) {
-    if (!(ptr = R_NEW0 (RBinSection)))
+		if (!(ptr = R_NEW0 (RBinSection)))
   		return ret;
-    char* section_name;
-    asprintf(&section_name, "PRG %i",i);
-    strcpy (ptr->name, section_name);
-    ptr->vsize = ptr->size = 0x4000;
-    ptr->vaddr = ptr->paddr = 0x10+i*ptr->size;
-    r_list_append (ret, ptr);
-    free(section_name);
+		char* section_name;
+		asprintf(&section_name, "PRG %i",i);
+		strcpy (ptr->name, section_name);
+		ptr->vsize = ptr->size = PRG_PAGE_SIZE;
+		ptr->vaddr = ptr->paddr = INES_HDR_SIZE+i*PRG_PAGE_SIZE;
+		first_chr_chunk = ptr->vaddr + PRG_PAGE_SIZE;
+		r_list_append (ret, ptr);
+		free(section_name);
+  }
+  for(i=0; i<ihdr.chr_page_count_8k; i++) {
+		if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+		char* section_name;
+		asprintf(&section_name, "CHR %i",i);
+		strcpy (ptr->name, section_name);
+		ptr->vsize = ptr->size = CHR_PAGE_SIZE;
+		ptr->vaddr = ptr->paddr = first_chr_chunk+i*CHR_PAGE_SIZE;
+		r_list_append (ret, ptr);
+		free(section_name);
   }
 
   return ret;
