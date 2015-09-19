@@ -52,7 +52,7 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 		return NULL;
 	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
+		return ret;
 /*	strcpy (ptr->name, "RAM");
 	ptr->paddr = ptr->vaddr = RAM_START_ADDRESS;
 	ptr->vsize = ptr->size = RAM_SIZE;
