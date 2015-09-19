@@ -48,7 +48,6 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	RBinSection *ptr = NULL;
 	if (!(ret = r_list_new ()))
 		return NULL;
-	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinSection)))
 		return ret;
 	strcpy (ptr->name, "ROM");
@@ -78,7 +77,6 @@ static RList* entries(RBinFile *arch) { //Should be 3 offsets pointed by NMI, RE
 	RBinAddr *ptr = NULL;
 	if (!(ret = r_list_new ()))
 		return NULL;
-	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinAddr)))
 		return ret;
 	ptr->paddr = INES_HDR_SIZE;
@@ -91,13 +89,8 @@ struct r_bin_plugin_t r_bin_plugin_nes = {
 	.name = "nes",
 	.desc = "NES",
 	.license = "BSD",
-	.init = NULL,
-	.fini = NULL,
-	.get_sdb = NULL,
-	.load = NULL,
 	.load_bytes = &load_bytes,
 	.check = &check,
-	.baddr = NULL,
 	.check_bytes = &check_bytes,
 	.entries = &entries,
 	.sections = sections,
