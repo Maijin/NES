@@ -31,7 +31,6 @@ static RBinInfo* info(RBinFile *arch) {
 		eprintf ("Truncated Header\n");
 		return NULL;
 	}
-
 	if (!(ret = R_NEW0 (RBinInfo)))
 		return NULL;
 	ret->file = strdup (arch->file);
