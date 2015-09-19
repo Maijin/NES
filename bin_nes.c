@@ -5,7 +5,8 @@
 #define PRG_PAGE_SIZE                       0x4000
 #define CHR_PAGE_SIZE                       0x2000
 #define INES_HDR_SIZE                       sizeof (ines_hdr)
-
+#define ROM_START_ADDRESS                   0x8000
+#define ROM_SIZE                            0x8000
 
 typedef struct __attribute__((__packed__)) {
 	char id[0x4];						  // NES\x1A
@@ -82,10 +83,9 @@ static RList* sections(RBinFile *arch) {
 		strcpy (ptr->name, "PRG");
 		ptr->vsize = ptr->size = PRG_PAGE_SIZE;
 		ptr->vaddr = ptr->paddr = INES_HDR_SIZE+i*PRG_PAGE_SIZE;
-
 		r_list_append (ret, ptr);
   }
-	first_chr_chunk = ptr->vaddr + PRG_PAGE_SIZE;
+	first_chr_chunk = ptr->paddr + PRG_PAGE_SIZE;
   for(i=0; i<ihdr.chr_page_count_8k; i++) {
 		if (!(ptr = R_NEW0 (RBinSection)))
   		return ret;
@@ -94,8 +94,17 @@ static RList* sections(RBinFile *arch) {
 		ptr->vaddr = ptr->paddr = first_chr_chunk+i*CHR_PAGE_SIZE;
 		r_list_append (ret, ptr);
   }
+  if (!(ptr = R_NEW0 (RBinSection)))
+  	return ret;
+  strcpy (ptr->name, "ROM");
+  ptr->paddr = INES_HDR_SIZE;
+  ptr->vaddr = ROM_START_ADDRESS+ihdr.prg_page_count_16k*PRG_PAGE_SIZE;
+  ptr->vsize = ptr->size = ROM_SIZE;
+  r_list_append (ret, ptr);
+
   return ret;
 }
+
 
 
 struct r_bin_plugin_t r_bin_plugin_nes = {
