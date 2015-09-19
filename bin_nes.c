@@ -3,18 +3,6 @@
 #include <r_bin.h>
 #include "nes_specs.h"
 
-
-typedef struct __attribute__((__packed__)) {
-	char id[0x4];							// NES\x1A
-	ut8 prg_page_count_16k;				 // number of PRG-ROM pages
-	ut8 chr_page_count_8k;				// number of CHR-ROM pages
-	ut8 rom_control_byte_0;				 // flags describing ROM image
-	ut8 rom_control_byte_1;				 // flags describing ROM image
-	ut8 ram_bank_count_8k;				// size of PRG RAM
-	ut8 reserved[7];						// zero filled
-} ines_hdr;
-
-
 static int check(RBinFile *arch);
 static int check_bytes(const ut8 *buf, ut64 length);
 
@@ -31,7 +19,7 @@ static int check(RBinFile *arch) {
 
 static int check_bytes(const ut8 *buf, ut64 length) {
 	if (!buf || length < 4) return false;
-	return (!memcmp (buf, "\x4E\x45\x53\x1A", 4));
+	return (!memcmp (buf, INES_MAGIC, 4));
 }
 
 static RBinInfo* info(RBinFile *arch) {
@@ -65,7 +53,7 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinSection)))
 			return ret;
-	strcpy (ptr->name, "RAM");
+/*	strcpy (ptr->name, "RAM");
 	ptr->paddr = ptr->vaddr = RAM_START_ADDRESS;
 	ptr->vsize = ptr->size = RAM_SIZE;
 	r_list_append (ret, ptr);
@@ -94,12 +82,13 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	ptr->vsize = ptr->size = TRAINER_SIZE;
 	r_list_append (ret, ptr);
 	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
+			return ret;*/
 	strcpy (ptr->name, "ROM");
 	ptr->paddr = INES_HDR_SIZE;
 	ptr->size = ihdr.prg_page_count_16k*PRG_PAGE_SIZE;
 	ptr->vaddr = ROM_START_ADDRESS;
 	ptr->vsize = ROM_SIZE;
+	ptr->srwx = R_BIN_SCN_MAP;
 	r_list_append (ret, ptr);
 
 	return ret;
@@ -118,6 +107,20 @@ static RList* sections(RBinFile *arch) {
 	return ret;
 }
 
+static RList* entries(RBinFile *arch) {
+	RList *ret;
+	RBinAddr *ptr = NULL;
+	if (!(ret = r_list_new ()))
+		return NULL;
+	ret->free = free;
+	if (!(ptr = R_NEW0 (RBinAddr)))
+		return ret;
+	ptr->paddr = INES_HDR_SIZE; 
+	ptr->vaddr = ROM_START_ADDRESS;
+	r_list_append (ret, ptr);
+	return ret;
+}
+
 struct r_bin_plugin_t r_bin_plugin_nes = {
 	.name = "nes",
 	.desc = "NES",
@@ -130,7 +133,7 @@ struct r_bin_plugin_t r_bin_plugin_nes = {
 	.check = &check,
 	.baddr = NULL,
 	.check_bytes = &check_bytes,
-	.entries = NULL,
+	.entries = &entries,
 	.sections = sections,
 	.info = &info,
 };
