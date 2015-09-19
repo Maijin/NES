@@ -57,7 +57,7 @@ static RBinInfo* info(RBinFile *arch) {
 	return ret;
 }
 
-static RList* create_nes_cpu_memory_map() {
+static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	RList *ret = NULL;
 	RBinSection *ptr = NULL;
 	if (!(ret = r_list_new ()))
@@ -96,8 +96,10 @@ static RList* create_nes_cpu_memory_map() {
 	if (!(ptr = R_NEW0 (RBinSection)))
 			return ret;
 	strcpy (ptr->name, "ROM");
-	ptr->paddr = ptr->vaddr = ROM_START_ADDRESS;
-	ptr->vsize = ptr->size = ROM_SIZE;
+	ptr->paddr = INES_HDR_SIZE;
+	ptr->size = ihdr.prg_page_count_16k*PRG_PAGE_SIZE;
+	ptr->vaddr = ROM_START_ADDRESS;
+	ptr->vsize = ROM_SIZE;
 	r_list_append (ret, ptr);
 
 	return ret;
@@ -111,7 +113,7 @@ static RList* sections(RBinFile *arch) {
 		eprintf ("Truncated Header\n");
 		return NULL;
 	}
-	RList *ret = create_nes_cpu_memory_map();
+	RList *ret = create_nes_cpu_memory_map(ihdr);
 
 	return ret;
 }
