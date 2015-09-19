@@ -5,13 +5,13 @@
 
 
 typedef struct __attribute__((__packed__)) {
-	char id[0x4];						  // NES\x1A
-	ut8 prg_page_count_16k;			   // number of PRG-ROM pages
+	char id[0x4];							// NES\x1A
+	ut8 prg_page_count_16k;				 // number of PRG-ROM pages
 	ut8 chr_page_count_8k;				// number of CHR-ROM pages
-	ut8 rom_control_byte_0;			   // flags describing ROM image
-	ut8 rom_control_byte_1;			   // flags describing ROM image
+	ut8 rom_control_byte_0;				 // flags describing ROM image
+	ut8 rom_control_byte_1;				 // flags describing ROM image
 	ut8 ram_bank_count_8k;				// size of PRG RAM
-	ut8 reserved[7];					  // zero filled
+	ut8 reserved[7];						// zero filled
 } ines_hdr;
 
 
@@ -36,15 +36,15 @@ static int check_bytes(const ut8 *buf, ut64 length) {
 
 static RBinInfo* info(RBinFile *arch) {
 	RBinInfo *ret = NULL;
-  ines_hdr ihdr;
-  memset (&ihdr, 0, INES_HDR_SIZE);
-  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
-  if (reat != INES_HDR_SIZE) {
+	ines_hdr ihdr;
+	memset (&ihdr, 0, INES_HDR_SIZE);
+	int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
+	if (reat != INES_HDR_SIZE) {
 		eprintf ("Truncated Header\n");
 		return NULL;
-  }
+	}
 
-  if (!(ret = R_NEW0 (RBinInfo)))
+	if (!(ret = R_NEW0 (RBinInfo)))
 		return NULL;
 	ret->file = strdup (arch->file);
 	ret->type = strdup ("ROM");
@@ -63,32 +63,32 @@ static RList* create_nes_cpu_memory_map() {
 		return NULL;
 	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
+			return ret;
 	strcpy (ptr->name, "RAM");
 	ptr->paddr = ptr->vaddr = RAM_START_ADDRESS;
 	ptr->vsize = ptr->size = RAM_SIZE;
 	r_list_append (ret, ptr);
 	if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
+			return ret;
 	strcpy (ptr->name, "IOREGS");
 	ptr->paddr = ptr->vaddr = IOREGS_START_ADDRESS;
 	ptr->vsize = ptr->size = IOREGS_SIZE;
 	r_list_append (ret, ptr);
 
 	if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
+			return ret;
 	strcpy (ptr->name, "EXPROM");
 	ptr->paddr = ptr->vaddr = EXPROM_START_ADDRESS;
 	ptr->vsize = ptr->size = EXPROM_SIZE;
 	r_list_append (ret, ptr);
 	if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
+			return ret;
 	strcpy (ptr->name, "SRAM");
 	ptr->paddr = ptr->vaddr = SRAM_START_ADDRESS;
 	ptr->vsize = ptr->size = SRAM_SIZE;
 	r_list_append (ret, ptr);
 	if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
+			return ret;
 	strcpy (ptr->name, "ROM");
 	ptr->paddr = ptr->vaddr = ROM_START_ADDRESS;
 	ptr->vsize = ptr->size = ROM_SIZE;
@@ -98,21 +98,17 @@ static RList* create_nes_cpu_memory_map() {
 }
 
 static RList* sections(RBinFile *arch) {
-  ines_hdr ihdr;
-  memset (&ihdr, 0, INES_HDR_SIZE);
-  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
-  if (reat != INES_HDR_SIZE) {
+	ines_hdr ihdr;
+	memset (&ihdr, 0, INES_HDR_SIZE);
+	int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
+	if (reat != INES_HDR_SIZE) {
 		eprintf ("Truncated Header\n");
 		return NULL;
-  }
-  RList *ret = create_nes_cpu_memory_map();
+	}
+	RList *ret = create_nes_cpu_memory_map();
 
-  return ret;
+	return ret;
 }
-
-
-
-
 
 struct r_bin_plugin_t r_bin_plugin_nes = {
 	.name = "nes",
