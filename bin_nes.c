@@ -53,36 +53,6 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinSection)))
 		return ret;
-/*	strcpy (ptr->name, "RAM");
-	ptr->paddr = ptr->vaddr = RAM_START_ADDRESS;
-	ptr->vsize = ptr->size = RAM_SIZE;
-	r_list_append (ret, ptr);
-	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
-	strcpy (ptr->name, "IOREGS");
-	ptr->paddr = ptr->vaddr = IOREGS_START_ADDRESS;
-	ptr->vsize = ptr->size = IOREGS_SIZE;
-	r_list_append (ret, ptr);
-	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
-	strcpy (ptr->name, "EXPROM");
-	ptr->paddr = ptr->vaddr = EXPROM_START_ADDRESS;
-	ptr->vsize = ptr->size = EXPROM_SIZE;
-	r_list_append (ret, ptr);
-	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
-	strcpy (ptr->name, "SRAM");
-	ptr->paddr = ptr->vaddr = SRAM_START_ADDRESS;
-	ptr->vsize = ptr->size = SRAM_SIZE;
-	r_list_append (ret, ptr);
-	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;
-	strcpy (ptr->name, "TRAINER");
-	ptr->paddr = ptr->vaddr = TRAINER_START_ADDRESS;
-	ptr->vsize = ptr->size = TRAINER_SIZE;
-	r_list_append (ret, ptr);
-	if (!(ptr = R_NEW0 (RBinSection)))
-			return ret;*/
 	strcpy (ptr->name, "ROM");
 	ptr->paddr = INES_HDR_SIZE;
 	ptr->size = ihdr.prg_page_count_16k * PRG_PAGE_SIZE;
