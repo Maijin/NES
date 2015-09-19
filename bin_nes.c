@@ -5,6 +5,24 @@
 #define PRG_PAGE_SIZE                       0x4000
 #define CHR_PAGE_SIZE                       0x2000
 #define INES_HDR_SIZE                       sizeof (ines_hdr)
+#define RAM_START_ADDRESS                   0x0
+#define RAM_SIZE                            0x2000
+
+#define IOREGS_START_ADDRESS                0x2000
+#define IOREGS_SIZE                         0x2020
+
+#define EXPROM_START_ADDRESS                0x4020
+#define EXPROM_SIZE                         0x1FE0
+
+#define TRAINER_START_ADDRESS               0x7000
+#define TRAINER_SIZE                        0x0200
+
+#define SRAM_START_ADDRESS                  0x6000
+#define SRAM_SIZE                           0x2000
+
+#define TRAINER_START_ADDRESS               0x7000
+#define TRAINER_SIZE                        0x0200
+
 #define ROM_START_ADDRESS                   0x8000
 #define ROM_SIZE                            0x8000
 
@@ -60,12 +78,48 @@ static RBinInfo* info(RBinFile *arch) {
 	return ret;
 }
 
-static RList* sections(RBinFile *arch) {
-  ut64 textsize = UT64_MAX;
-  ut64 first_chr_chunk;
+static RList* create_nes_cpu_memory_map() {
+	RList *ret = NULL;
+	RBinSection *ptr = NULL;
+	if (!(ret = r_list_new ()))
+		return NULL;
+	ret->free = free;
+	if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+	strcpy (ptr->name, "RAM");
+	ptr->paddr = ptr->vaddr = RAM_START_ADDRESS;
+	ptr->vsize = ptr->size = RAM_SIZE;
+	r_list_append (ret, ptr);
+	if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+	strcpy (ptr->name, "IOREGS");
+	ptr->paddr = ptr->vaddr = IOREGS_START_ADDRESS;
+	ptr->vsize = ptr->size = IOREGS_SIZE;
+	r_list_append (ret, ptr);
 
-  RList *ret = NULL;
-  RBinSection *ptr = NULL;
+	if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+	strcpy (ptr->name, "EXPROM");
+	ptr->paddr = ptr->vaddr = EXPROM_START_ADDRESS;
+	ptr->vsize = ptr->size = EXPROM_SIZE;
+	r_list_append (ret, ptr);
+	if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+	strcpy (ptr->name, "SRAM");
+	ptr->paddr = ptr->vaddr = SRAM_START_ADDRESS;
+	ptr->vsize = ptr->size = SRAM_SIZE;
+	r_list_append (ret, ptr);
+	if (!(ptr = R_NEW0 (RBinSection)))
+  		return ret;
+	strcpy (ptr->name, "ROM");
+	ptr->paddr = ptr->vaddr = ROM_START_ADDRESS;
+	ptr->vsize = ptr->size = ROM_SIZE;
+	r_list_append (ret, ptr);
+
+	return ret;
+}
+
+static RList* sections(RBinFile *arch) {
   ines_hdr ihdr;
   memset (&ihdr, 0, INES_HDR_SIZE);
   int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
@@ -73,37 +127,12 @@ static RList* sections(RBinFile *arch) {
 		eprintf ("Truncated Header\n");
 		return NULL;
   }
-  if (!(ret = r_list_new ()))
-		return NULL;
-	ret->free = free;
-  int i;
-  for(i=0; i<ihdr.prg_page_count_16k; i++) {
-		if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
-		strcpy (ptr->name, "PRG");
-		ptr->vsize = ptr->size = PRG_PAGE_SIZE;
-		ptr->vaddr = ptr->paddr = INES_HDR_SIZE+i*PRG_PAGE_SIZE;
-		r_list_append (ret, ptr);
-  }
-	first_chr_chunk = ptr->paddr + PRG_PAGE_SIZE;
-  for(i=0; i<ihdr.chr_page_count_8k; i++) {
-		if (!(ptr = R_NEW0 (RBinSection)))
-  		return ret;
-		strcpy (ptr->name, "CHR");
-		ptr->vsize = ptr->size = CHR_PAGE_SIZE;
-		ptr->vaddr = ptr->paddr = first_chr_chunk+i*CHR_PAGE_SIZE;
-		r_list_append (ret, ptr);
-  }
-  if (!(ptr = R_NEW0 (RBinSection)))
-  	return ret;
-  strcpy (ptr->name, "ROM");
-  ptr->paddr = INES_HDR_SIZE;
-  ptr->vaddr = ROM_START_ADDRESS;
-  ptr->vsize = ptr->size = ROM_SIZE;
-  r_list_append (ret, ptr);
+  RList *ret = create_nes_cpu_memory_map();
 
   return ret;
 }
+
+
 
 
 
