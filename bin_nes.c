@@ -40,7 +40,6 @@ static RBinInfo* info(RBinFile *arch) {
 	ret->arch = strdup ("6502");
 	ret->bits = 8;
 	ret->has_va = 1;
-
 	return ret;
 }
 
@@ -59,7 +58,6 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 	ptr->vsize = ROM_SIZE;
 	ptr->srwx = R_BIN_SCN_MAP;
 	r_list_append (ret, ptr);
-
 	return ret;
 }
 
@@ -72,7 +70,6 @@ static RList* sections(RBinFile *arch) {
 		return NULL;
 	}
 	RList *ret = create_nes_cpu_memory_map(ihdr);
-
 	return ret;
 }
 
