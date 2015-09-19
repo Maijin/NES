@@ -1,3 +1,5 @@
+/* radare - LGPL - 2015 - maijin */
+
 #ifndef _NES_H
 #define _NES_H
 
@@ -30,14 +32,13 @@
 #define IRQ_VECTOR_START_ADDRESS            0xFFFE
 
 typedef struct __attribute__((__packed__)) {
-	char id[0x4];							// NES\x1A
+	char id[0x4];					// NES\x1A
 	ut8 prg_page_count_16k;				 // number of PRG-ROM pages
 	ut8 chr_page_count_8k;				// number of CHR-ROM pages
 	ut8 rom_control_byte_0;				 // flags describing ROM image
 	ut8 rom_control_byte_1;				 // flags describing ROM image
 	ut8 ram_bank_count_8k;				// size of PRG RAM
-	ut8 reserved[7];						// zero filled
+	ut8 reserved[7];				// zero filled
 } ines_hdr;
-
 
 #endif // _NES_H
