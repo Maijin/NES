@@ -40,16 +40,15 @@ static int check_bytes(const ut8 *buf, ut64 length) {
 static RBinInfo* info(RBinFile *arch) {
 	RBinInfo *ret = NULL;
   ines_hdr ihdr;
-  memset (&ihdr, 0, sizeof (ihdr));
-  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
-  if (reat != sizeof (ihdr)) {
+  memset (&ihdr, 0, INES_HDR_SIZE);
+  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
+  if (reat != INES_HDR_SIZE) {
 		eprintf ("Truncated Header\n");
 		return NULL;
   }
 
   if (!(ret = R_NEW0 (RBinInfo)))
 		return NULL;
-
 	ret->file = strdup (arch->file);
 	ret->type = strdup ("ROM");
 	ret->machine = strdup ("Nintendo NES");
@@ -62,45 +61,39 @@ static RBinInfo* info(RBinFile *arch) {
 
 static RList* sections(RBinFile *arch) {
   ut64 textsize = UT64_MAX;
+  ut64 first_chr_chunk;
+
   RList *ret = NULL;
   RBinSection *ptr = NULL;
   ines_hdr ihdr;
-  memset (&ihdr, 0, sizeof (ihdr));
-  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, sizeof (ihdr));
-  if (reat != sizeof (ihdr)) {
+  memset (&ihdr, 0, INES_HDR_SIZE);
+  int reat = r_buf_read_at (arch->buf, 0, (ut8*)&ihdr, INES_HDR_SIZE);
+  if (reat != INES_HDR_SIZE) {
 		eprintf ("Truncated Header\n");
 		return NULL;
   }
-
   if (!(ret = r_list_new ()))
 		return NULL;
 	ret->free = free;
   int i;
-  ut64 first_chr_chunk;
   for(i=0; i<ihdr.prg_page_count_16k; i++) {
 		if (!(ptr = R_NEW0 (RBinSection)))
   		return ret;
-		char* section_name;
-		asprintf(&section_name, "PRG %i",i);
-		strcpy (ptr->name, section_name);
+		strcpy (ptr->name, "PRG");
 		ptr->vsize = ptr->size = PRG_PAGE_SIZE;
 		ptr->vaddr = ptr->paddr = INES_HDR_SIZE+i*PRG_PAGE_SIZE;
-		first_chr_chunk = ptr->vaddr + PRG_PAGE_SIZE;
+
 		r_list_append (ret, ptr);
-		free(section_name);
   }
+	first_chr_chunk = ptr->vaddr + PRG_PAGE_SIZE;
   for(i=0; i<ihdr.chr_page_count_8k; i++) {
 		if (!(ptr = R_NEW0 (RBinSection)))
   		return ret;
-		char* section_name;
-		asprintf(&section_name, "CHR %i",i);
-		strcpy (ptr->name, section_name);
+		strcpy (ptr->name, "CHR");
 		ptr->vsize = ptr->size = CHR_PAGE_SIZE;
 		ptr->vaddr = ptr->paddr = first_chr_chunk+i*CHR_PAGE_SIZE;
 		r_list_append (ret, ptr);
-		free(section_name);
   }
-
   return ret;
 }
 
