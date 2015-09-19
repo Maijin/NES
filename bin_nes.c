@@ -76,7 +76,7 @@ static RList* sections(RBinFile *arch) {
 	return ret;
 }
 
-static RList* entries(RBinFile *arch) {
+static RList* entries(RBinFile *arch) { //Should be 3 offsets pointed by NMI, RESET, IRQ after mapping && default = 1st CHR
 	RList *ret;
 	RBinAddr *ptr = NULL;
 	if (!(ret = r_list_new ()))
@@ -85,7 +85,7 @@ static RList* entries(RBinFile *arch) {
 	if (!(ptr = R_NEW0 (RBinAddr)))
 		return ret;
 	ptr->paddr = INES_HDR_SIZE;
-	ptr->vaddr = ROM_START_ADDRESS; //Should be value pointed by RESET_VECTOR_START_ADDRESS after mapping
+	ptr->vaddr = ROM_START_ADDRESS;
 	r_list_append (ret, ptr);
 	return ret;
 }
