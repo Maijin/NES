@@ -25,6 +25,9 @@
 #define ROM_START_ADDRESS                   0x8000
 #define ROM_SIZE                            0x8000
 
+#define NMI_VECTOR_START_ADDRESS            0xFFFA
+#define RESET_VECTOR_START_ADDRESS          0xFFFC
+#define IRQ_VECTOR_START_ADDRESS            0xFFFE
 
 typedef struct __attribute__((__packed__)) {
 	char id[0x4];							// NES\x1A

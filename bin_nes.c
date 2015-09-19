@@ -85,7 +85,7 @@ static RList* create_nes_cpu_memory_map(ines_hdr ihdr) {
 			return ret;*/
 	strcpy (ptr->name, "ROM");
 	ptr->paddr = INES_HDR_SIZE;
-	ptr->size = ihdr.prg_page_count_16k*PRG_PAGE_SIZE;
+	ptr->size = ihdr.prg_page_count_16k * PRG_PAGE_SIZE;
 	ptr->vaddr = ROM_START_ADDRESS;
 	ptr->vsize = ROM_SIZE;
 	ptr->srwx = R_BIN_SCN_MAP;
@@ -115,8 +115,8 @@ static RList* entries(RBinFile *arch) {
 	ret->free = free;
 	if (!(ptr = R_NEW0 (RBinAddr)))
 		return ret;
-	ptr->paddr = INES_HDR_SIZE; 
-	ptr->vaddr = ROM_START_ADDRESS;
+	ptr->paddr = INES_HDR_SIZE;
+	ptr->vaddr = ROM_START_ADDRESS; //Should be value pointed by RESET_VECTOR_START_ADDRESS after mapping
 	r_list_append (ret, ptr);
 	return ret;
 }
