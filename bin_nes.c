@@ -52,6 +52,7 @@ static RBinInfo* info(RBinFile *arch) {
 	ret->os = strdup ("nes");
 	ret->arch = strdup ("6502");
 	ret->bits = 8;
+	ret->has_va = 1;
 
 	return ret;
 }
@@ -74,7 +75,6 @@ static RList* create_nes_cpu_memory_map() {
 	ptr->paddr = ptr->vaddr = IOREGS_START_ADDRESS;
 	ptr->vsize = ptr->size = IOREGS_SIZE;
 	r_list_append (ret, ptr);
-
 	if (!(ptr = R_NEW0 (RBinSection)))
 			return ret;
 	strcpy (ptr->name, "EXPROM");
@@ -86,6 +86,12 @@ static RList* create_nes_cpu_memory_map() {
 	strcpy (ptr->name, "SRAM");
 	ptr->paddr = ptr->vaddr = SRAM_START_ADDRESS;
 	ptr->vsize = ptr->size = SRAM_SIZE;
+	r_list_append (ret, ptr);
+	if (!(ptr = R_NEW0 (RBinSection)))
+			return ret;
+	strcpy (ptr->name, "TRAINER");
+	ptr->paddr = ptr->vaddr = TRAINER_START_ADDRESS;
+	ptr->vsize = ptr->size = TRAINER_SIZE;
 	r_list_append (ret, ptr);
 	if (!(ptr = R_NEW0 (RBinSection)))
 			return ret;
