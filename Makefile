@@ -1,5 +1,5 @@
 NAME=bin_nes
-R2_PLUGIN_PATH=$(shell r2 -hh|grep user|grep plugins|awk '{print $$2}')
+R2_PLUGIN_PATH=./radare2/plugins
 CFLAGS=-g -fPIC $(shell pkg-config --cflags r_bin) $(R2_INCLUDE)
 LDFLAGS=-shared $(shell pkg-config --libs r_bin)
 OBJS=$(NAME).o
