@@ -8,8 +8,7 @@ install:
   - ./configure --prefix=`pwd`/install > /dev/null
   - make -s > /dev/null
   - make install > /dev/null
-  - make pkgcfg > /dev/null
-  - #export R2_INCLUDE="-I/home/travis/build/Maijin/NES/radare2/libr/include"
+  - export PKG_CONFIG_PATH="-I/home/travis/build/Maijin/NES/radare2/libr/include"
   - cd ..
 
 script:
