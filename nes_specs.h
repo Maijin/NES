@@ -1,4 +1,4 @@
-/* radare - LGPL - 2015 - maijin */
+/* radare - LGPL3 - 2015 - maijin */
 
 //CPU_memory_map: http://wiki.nesdev.com/w/index.php/CPU_memory_map
 
